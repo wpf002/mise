@@ -12,7 +12,7 @@ export const STYLES = style([
   { id: 'grilled', label: 'Grilled', emoji: '🔥', needs: ['grill'] },
   { id: 'shallow-fried', label: 'Shallow Fried', emoji: '🍳', roles: ['crunch', 'fat'], needs: ['fry'] },
   { id: 'deep-fried', label: 'Deep Fried', emoji: '🍟', roles: ['crunch', 'fat'], needs: ['fry'], skill: 2 },
-  { id: 'air-fried', label: 'Air Fried', emoji: '🌀', roles: ['crunch'], needs: ['air-fry'] },
+  { id: 'air-fried', label: 'Air Fried', emoji: '💨', roles: ['crunch'], needs: ['air-fry'] },
   { id: 'stir-fried', label: 'Stir Fried', emoji: '🥘', needs: ['fry', 'sear'] },
   { id: 'steamed', label: 'Steamed', emoji: '♨️', needs: ['steam'] },
   { id: 'poached', label: 'Poached', emoji: '💧', needs: ['simmer'], skill: 2 },

@@ -1,7 +1,7 @@
 import type { JudgeResult } from '@mise/schema';
 import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Alert, Text, TextInput, View } from 'react-native';
 import { api, OfflineError } from '../../src/api/client';
 import { Body, Button, Card, Heading, Label, Row, Screen, SPACE, Title } from '../../src/components/ui';
@@ -36,13 +36,17 @@ export default function JudgeScreen() {
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<JudgeResult | null>(null);
 
+  const finished = useRef(false);
+
   useEffect(() => {
+    if (finished.current) return;
     if (!arena || arena.id !== id) router.replace('/(tabs)/arena');
   }, [arena, id, router]);
 
   if (!arena || arena.id !== id) return null;
 
   const finish = (judge: JudgeResult | null) => {
+    finished.current = true;
     saveRecipe({ challenge: arena.challenge, recipe: arena.recipe, fallbackReason: 'none', rating: null, notes: description, photoUri: photo?.uri ?? null, judge });
     endArena();
     router.replace('/(tabs)/kitchen');

@@ -111,6 +111,14 @@ describe('validate', () => {
     }
   });
 
+  it('uses "an" before vowel-led equipment in the rules fallback', () => {
+    const challenge = seeds
+      .map((seed) => createChallenge({ ...ALL, timeLimitMinutes: 30 }, seed))
+      .find((candidate) => candidate.slots.equipment?.entryId === 'air-fryer');
+    if (!challenge) throw new Error('no seed picked the air fryer');
+    expect(rulesRecipe(challenge).equipmentNotes).toEqual(['Built for an air fryer.']);
+  });
+
   it('flags allergens by keyword and time overruns', () => {
     const challenge = createChallenge({ ...ALL, timeLimitMinutes: 20, excludeAllergens: ['milk'] }, 'abc');
     const recipe = { ...rulesRecipe(challenge), totalMinutes: 45, ingredients: [{ name: 'Heavy cream', quantity: '1 cup', mandatory: true }] };

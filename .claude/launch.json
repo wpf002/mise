@@ -1,0 +1,7 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "api", "runtimeExecutable": "pnpm", "runtimeArgs": ["dev:api"], "port": 4000 },
+    { "name": "expo", "runtimeExecutable": "pnpm", "runtimeArgs": ["--filter", "@mise/mobile", "exec", "expo", "start", "--ios"], "port": 8081 }
+  ]
+}

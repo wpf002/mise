@@ -24,6 +24,13 @@ function heat(equipment: Entry | undefined): string {
  * Deterministic no-AI plan. Readable, safe, and labeled 'rules' so the UI never
  * passes it off as the chef.
  */
+const VOWELS = new Set(['a', 'e', 'i', 'o', 'u']);
+
+/** Prefix a noun with "a" or "an". */
+function withArticle(noun: string): string {
+  return `${VOWELS.has(noun[0] ?? '') ? 'an' : 'a'} ${noun}`;
+}
+
 export function rulesRecipe(challenge: Challenge): Recipe {
   const draft = draftFromSlots(challenge.slots);
   const { protein, produce, equipment, style, cuisine, wildcard, format, flavor } = draft;
@@ -59,7 +66,7 @@ export function rulesRecipe(challenge: Challenge): Recipe {
     totalMinutes,
     ingredients,
     steps,
-    equipmentNotes: equipment ? [`Built for a ${equipment.label.toLowerCase()}.`] : [],
+    equipmentNotes: equipment ? [`Built for ${withArticle(equipment.label.toLowerCase())}.`] : [],
     flavorNotes: flavor ? `Lean ${flavor.label.toLowerCase()}. Taste before plating.` : 'Season in layers and taste before plating.',
     plating: 'Keep it simple. Hero in the middle, produce around it, finish on top.',
     safetyNotes: requiredSafetyNotes(challenge),
