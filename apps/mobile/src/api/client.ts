@@ -1,4 +1,4 @@
-import { Challenge, DetectedIngredient, JudgeResult, Recipe, type TasteProfile } from '@mise/schema';
+import { Challenge, DetectedIngredient, Recipe, type TasteProfile } from '@mise/schema';
 import { z } from 'zod';
 
 const API_URL = (process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:4000').replace(/\/$/, '');
@@ -51,9 +51,6 @@ export const api = {
 
   snap: (imageBase64: string, mimeType: 'image/jpeg' | 'image/png') =>
     post('/snap', { imageBase64, mimeType }, z.object({ ingredients: z.array(DetectedIngredient) }), RECIPE_TIMEOUT_MS),
-
-  judge: (input: { challenge: Challenge; dishName: string; description: string; notes?: string; imageBase64?: string }) =>
-    post('/judge', input, JudgeResult, RECIPE_TIMEOUT_MS),
 
   today: (deviceId: string, timeZone: string, profile: TasteProfile | null, swap: 0 | 1) =>
     post('/today', { deviceId, timeZone, profile, swap }, RecipeOutcome.extend({ day: z.string(), challenge: Challenge }), RECIPE_TIMEOUT_MS),

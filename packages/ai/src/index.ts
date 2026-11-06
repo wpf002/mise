@@ -1,7 +1,6 @@
 import type {
   Challenge,
   DetectedIngredient,
-  JudgeResult,
   Recipe,
   TasteProfile,
 } from '@mise/schema';
@@ -24,15 +23,6 @@ export interface ChefModel {
     imageBase64: string;
     mimeType: 'image/jpeg' | 'image/png';
   }): Promise<DetectedIngredient[]>;
-  /** Judging is always an estimate with evidence labels per line. */
-  judge(input: {
-    challenge: Challenge;
-    labels: Record<string, string>;
-    dishName: string;
-    description: string;
-    notes?: string;
-    imageBase64?: string;
-  }): Promise<JudgeResult>;
 }
 
 export class ModelUnavailableError extends Error {

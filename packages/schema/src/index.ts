@@ -63,7 +63,6 @@ export const ChallengeConfig = z.object({
   categories: z.array(CategoryId).min(2).max(8),
   difficulty: Difficulty,
   chaos: z.number().min(0).max(1),
-  timeLimitMinutes: z.number().int().min(5).max(180).nullable(),
   mode: Mode,
   excludeAllergens: z.array(Allergen),
   diets: z.array(Diet),
@@ -85,17 +84,31 @@ export type Challenge = z.infer<typeof Challenge>;
 
 export const RecipeIngredient = z.object({
   name: z.string(),
+  /** Precise amount: "1 lb", "2 tbsp", "1 medium". */
   quantity: z.string(),
+  /** How it is cut or readied: "cut into 1-inch cubes", "minced". */
+  prep: z.string().optional(),
   mandatory: z.boolean(),
   entryId: z.string().optional(),
 });
+export type RecipeIngredient = z.infer<typeof RecipeIngredient>;
+
+/** Ingredients grouped by component: "For the pork", "For the glaze", "To serve". */
+export const IngredientGroup = z.object({
+  title: z.string(),
+  items: z.array(RecipeIngredient).min(1),
+});
+export type IngredientGroup = z.infer<typeof IngredientGroup>;
 
 export const RecipeStep = z.object({
-  atMinute: z.number().int().nonnegative(),
-  durationMinutes: z.number().int().positive(),
+  /** Short imperative headline: "Sear the chicken". */
+  title: z.string(),
+  /** The full instruction: heat level, times, temperatures, and what done looks like. */
   text: z.string(),
+  durationMinutes: z.number().int().positive(),
   equipmentId: z.string().optional(),
 });
+export type RecipeStep = z.infer<typeof RecipeStep>;
 
 /** Source tells the UI how to label a recipe. Never show 'demo' or 'rules' as live AI. */
 export const RecipeSource = z.enum(['ai', 'rules', 'demo']);
@@ -104,10 +117,16 @@ export const Recipe = z.object({
   title: z.string(),
   concept: z.string(),
   servings: z.number().int().positive(),
+  prepMinutes: z.number().int().nonnegative(),
+  cookMinutes: z.number().int().nonnegative(),
   totalMinutes: z.number().int().positive(),
-  ingredients: z.array(RecipeIngredient).min(1),
+  /** Every tool the cook needs, named specifically: "12-inch cast iron skillet", "instant-read thermometer". */
+  equipment: z.array(z.string()),
+  ingredientGroups: z.array(IngredientGroup).min(1),
   steps: z.array(RecipeStep).min(1),
-  equipmentNotes: z.array(z.string()),
+  tips: z.array(z.string()),
+  substitutions: z.array(z.string()),
+  storage: z.string(),
   flavorNotes: z.string(),
   plating: z.string(),
   safetyNotes: z.array(z.string()),
@@ -115,6 +134,11 @@ export const Recipe = z.object({
   source: RecipeSource,
 });
 export type Recipe = z.infer<typeof Recipe>;
+
+/** Flat list across every group, for validation and shopping lists. */
+export function recipeIngredients(recipe: Pick<Recipe, 'ingredientGroups'>): RecipeIngredient[] {
+  return recipe.ingredientGroups.flatMap((group) => group.items);
+}
 
 export const TasteProfile = z.object({
   skill: z.enum(['new', 'home', 'confident', 'pro']),
@@ -129,31 +153,6 @@ export const TasteProfile = z.object({
   preferredDifficulty: Difficulty,
 });
 export type TasteProfile = z.infer<typeof TasteProfile>;
-
-/** Every judging line carries what the score is actually based on. */
-export const Evidence = z.enum([
-  'seen-in-photo',
-  'reported-by-you',
-  'inferred-from-recipe',
-  'not-verifiable',
-]);
-
-export const JudgeLine = z.object({
-  category: z.enum(['flavor', 'creativity', 'technique', 'presentation', 'compliance']),
-  score: z.number().nonnegative(),
-  max: z.number().positive(),
-  evidence: Evidence,
-  note: z.string(),
-});
-
-export const JudgeResult = z.object({
-  lines: z.array(JudgeLine).length(5),
-  total: z.number(),
-  strengths: z.array(z.string()),
-  improvements: z.array(z.string()),
-  estimate: z.literal(true),
-});
-export type JudgeResult = z.infer<typeof JudgeResult>;
 
 /** Fridge Snap: what the vision model thinks it sees. User confirms before anything uses it. */
 export const DetectedIngredient = z.object({

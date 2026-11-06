@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { ChallengeConfig } from '@mise/schema';
+import { type ChallengeConfig, recipeIngredients } from '@mise/schema';
 import { DEFAULT_CONFIG, challengeLink, createChallenge, parseChallengeLink } from './challenge';
 import { dailySeed, dayKey } from './daily';
 import { entryById, LIBRARY } from './library';
@@ -106,25 +106,40 @@ describe('validate', () => {
 
   it('passes the rules fallback for many seeds', () => {
     for (const seed of seeds.slice(0, 300)) {
-      const challenge = createChallenge({ ...ALL, timeLimitMinutes: 30, excludeAllergens: ['peanut'] }, seed);
+      const challenge = createChallenge({ ...ALL, excludeAllergens: ['peanut'] }, seed);
       expect(validateRecipe(rulesRecipe(challenge), challenge)).toEqual([]);
     }
   });
 
-  it('uses "an" before vowel-led equipment in the rules fallback', () => {
+  it('lists the spun equipment in the rules fallback gear', () => {
     const challenge = seeds
-      .map((seed) => createChallenge({ ...ALL, timeLimitMinutes: 30 }, seed))
+      .map((seed) => createChallenge(ALL, seed))
       .find((candidate) => candidate.slots.equipment?.entryId === 'air-fryer');
     if (!challenge) throw new Error('no seed picked the air fryer');
-    expect(rulesRecipe(challenge).equipmentNotes).toEqual(['Built for an air fryer.']);
+    const gear = rulesRecipe(challenge).equipment.join(' ').toLowerCase();
+    expect(gear).toContain('air fryer');
   });
 
-  it('flags allergens by keyword and time overruns', () => {
-    const challenge = createChallenge({ ...ALL, timeLimitMinutes: 20, excludeAllergens: ['milk'] }, 'abc');
-    const recipe = { ...rulesRecipe(challenge), totalMinutes: 45, ingredients: [{ name: 'Heavy cream', quantity: '1 cup', mandatory: true }] };
+  it('writes detailed rules recipes with grouped ingredients and titled steps', () => {
+    const challenge = createChallenge(ALL, 'abc');
+    const recipe = rulesRecipe(challenge);
+    expect(recipe.ingredientGroups.length).toBeGreaterThanOrEqual(2);
+    expect(recipe.steps.length).toBeGreaterThanOrEqual(4);
+    for (const step of recipe.steps) {
+      expect(step.title.length).toBeGreaterThan(3);
+      expect(step.text.length).toBeGreaterThan(60);
+    }
+    expect(recipe.totalMinutes).toBe(recipe.prepMinutes + recipe.cookMinutes);
+    expect(recipe.tips.length).toBeGreaterThan(0);
+    expect(recipe.substitutions.length).toBeGreaterThan(0);
+    expect(recipe.storage.length).toBeGreaterThan(0);
+  });
+
+  it('flags allergens by keyword', () => {
+    const challenge = createChallenge({ ...ALL, excludeAllergens: ['milk'] }, 'abc');
+    const recipe = { ...rulesRecipe(challenge), ingredientGroups: [{ title: 'Test', items: [{ name: 'Heavy cream', quantity: '1 cup', mandatory: true }] }] };
     const codes = validateRecipe(recipe, challenge).map((issue) => issue.code);
     expect(codes).toContain('allergen');
-    expect(codes).toContain('time');
   });
 });
 
@@ -136,5 +151,38 @@ describe('daily', () => {
   it('mints stable 16-char seeds', () => {
     expect(dailySeed('u1', '2026-11-06')).toMatch(/^[0-9a-f]{16}$/);
     expect(dailySeed('u1', '2026-11-06')).toBe(dailySeed('u1', '2026-11-06'));
+  });
+
+  it('lists each ingredient once even when two wheels pick the same item', () => {
+    const challenge = createChallenge({ ...DEFAULT_CONFIG, categories: ['protein', 'wildcard', 'flavor'] }, 'seed-1', {
+      protein: { entryId: 'salmon', locked: true, rerolls: 0 },
+      wildcard: { entryId: 'fish-sauce', locked: true, rerolls: 0 },
+      flavor: { entryId: 'funky', locked: true, rerolls: 0 },
+    });
+    const names = recipeIngredients(rulesRecipe(challenge)).map((item) => item.name.toLowerCase());
+    expect(new Set(names).size).toBe(names.length);
+    expect(names).toContain('fish sauce');
+  });
+
+  it('does not tell the cook to pat mussels dry and salt them ahead', () => {
+    const challenge = createChallenge({ ...DEFAULT_CONFIG, categories: ['protein', 'produce'] }, 'seed-1', {
+      protein: { entryId: 'mussels', locked: true, rerolls: 0 },
+      produce: { entryId: 'bok-choy', locked: true, rerolls: 0 },
+    });
+    const mise = rulesRecipe(challenge).steps[0]?.text ?? '';
+    expect(mise).toContain('scrubbed');
+    expect(mise).not.toContain('Pat it dry');
+  });
+
+  it('never shows the word hero to the cook', () => {
+    const challenge = createChallenge({ ...DEFAULT_CONFIG, categories: ['protein', 'produce', 'format', 'flavor'] }, 'seed-1', {
+      protein: { entryId: 'mussels', locked: true, rerolls: 0 },
+      produce: { entryId: 'bok-choy', locked: true, rerolls: 0 },
+      flavor: { entryId: 'smoky', locked: true, rerolls: 0 },
+    });
+    const recipe = rulesRecipe(challenge);
+    const copy = [...recipe.steps.map((item) => item.text), ...recipe.tips, ...recipe.substitutions, recipe.plating, recipe.flavorNotes].join(' ');
+    expect(copy).not.toMatch(/\bhero\b/i);
+    expect(recipe.steps.at(-1)?.text).not.toContain('Slice');
   });
 });

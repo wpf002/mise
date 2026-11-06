@@ -12,7 +12,6 @@ import { chefPlugin } from './plugins/chef';
 import { dbPlugin } from './plugins/db';
 import { challengeRoutes } from './routes/challenges';
 import { healthRoutes } from './routes/health';
-import { judgeRoutes } from './routes/judge';
 import { recipeRoutes } from './routes/recipes';
 import { snapRoutes } from './routes/snap';
 import { todayRoutes } from './routes/today';
@@ -50,7 +49,6 @@ export async function buildApp(env: Env, overrides: AppOverrides = {}) {
   await app.register(challengeRoutes);
   await app.register(recipeRoutes);
   await app.register(snapRoutes);
-  await app.register(judgeRoutes);
   await app.register(todayRoutes);
   return app;
 }

@@ -7,10 +7,9 @@ iOS and Android. Built by Foti Ventures LLC.
 ## What It Does
 
 - **Today**: one recipe a day, picked from your favorite cuisines, proteins, gear, and usual cook time. Same pick all day, new one tomorrow.
-- **Spin**: 2 to 8 wheels (protein, produce, equipment, style, cuisine, wildcard, format, flavor). Lock what you like, reroll the rest, then cook it in Free Play or as a timed challenge.
+- **Spin**: 2 to 8 wheels (protein, produce, equipment, style, cuisine, wildcard, format, flavor). Lock what you like, reroll the rest, pick a preset like Mystery Basket or Kitchen Chaos, then cook it.
 - **Snap**: photograph your fridge, confirm what Mise found, and get a recipe built around it.
-- **Arena**: Quickfire, Standard, Master Chef, Mystery Basket, Kitchen Chaos, and Head-to-Head. Timed cooking, AI judging with evidence labels, friends, groups, and leaderboards.
-- **Kitchen**: saved recipes, history, Rematch and Reinvent, pantry, and your equipment.
+- **Kitchen**: saved recipes, history, Cook Again, pantry, and your equipment.
 
 ## Stack
 
@@ -27,7 +26,7 @@ iOS and Android. Built by Foti Ventures LLC.
 
 ```
 apps/
-  mobile/        Expo app (tabs: Today, Spin, Snap, Arena, Kitchen)
+  mobile/        Expo app (tabs: Today, Spin, Snap, Kitchen)
   api/           Fastify API, Prisma schema, AI routes
 packages/
   engine/        Seeded randomizer, ingredient library, food-safety table (pure TS, no I/O)
@@ -88,9 +87,8 @@ Mobile (`apps/mobile/.env`): only `EXPO_PUBLIC_API_URL`. Anything prefixed `EXPO
 - **Safety temperatures come from `@mise/engine/safety`**, not from the model. The validator rejects any recipe missing the right temperature for its protein.
 - **Allergens and dislikes are hard filters** applied before a wheel spins and again when validating the recipe.
 - **Fridge Snap results are suggestions** until the user confirms them.
-- **Judging is an estimate.** Every score line has an evidence label: seen in photo, reported by you, inferred from recipe, or not verifiable.
 - **Challenges replay exactly.** Each wheel draws from `hash(seed, category, rerolls)`, so a challenge ID plus seed reproduces the same spin.
-- **Timers use timestamps** (`endsAt - now`), so backgrounding or locking the phone never drifts the clock.
+- **Recipes are full recipes.** Grouped ingredients with quantities and prep, titled steps with heat, times, and doneness cues, gear, tips, substitutions, and storage. No timers, no scoring.
 
 ## Roadmap
 

@@ -1,11 +1,11 @@
-import { CATEGORY_IDS, type CategoryId, type Mode } from '@mise/schema';
-import { CATEGORY_LABEL, createChallenge, EmptyWheelError, MODE_MINUTES, reroll, toggleLock, type Slots } from '@mise/engine';
+import { CATEGORY_IDS, type CategoryId, type ChallengeConfig } from '@mise/schema';
+import { CATEGORY_LABEL, createChallenge, EmptyWheelError, reroll, toggleLock, type Slots } from '@mise/engine';
 import { useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { Alert, useWindowDimensions, View } from 'react-native';
 import { PrepBowl, SPIN_TOTAL_MS } from '../../src/components/spin/PrepBowl';
 import { ChaosDial } from '../../src/components/ui/ChaosDial';
-import { Body, Button, Chip, Label, Row, Screen, Segmented, SPACE, Stepper, Title } from '../../src/components/ui';
+import { Body, Button, Chip, Label, Row, Screen, SPACE, Title } from '../../src/components/ui';
 import { useRecipe } from '../../src/hooks/useRecipe';
 import { haptic } from '../../src/lib/haptics';
 import { mintSeed } from '../../src/lib/seed';
@@ -15,15 +15,13 @@ import { useTheme } from '../../src/theme/useTheme';
 
 const MIN_WHEELS = 2;
 const MAX_WHEELS = 8;
-const TIME_STEP = 5;
-const TIME_MIN = 10;
-const TIME_MAX = 180;
+const MYSTERY_BASKET_CHAOS = 0.6;
+const KITCHEN_CHAOS = 1;
 
-const MODES: Array<{ value: Mode; label: string }> = [
-  { value: 'free-play', label: 'Free' },
-  { value: 'quickfire', label: 'Quick' },
-  { value: 'standard', label: 'Standard' },
-  { value: 'master', label: 'Master' },
+/** One-tap setups. Each sets the mode so the chip reads as selected until the config changes again. */
+const PRESETS: Array<{ label: string; patch: Partial<ChallengeConfig> }> = [
+  { label: 'Mystery Basket', patch: { mode: 'mystery-basket', categories: ['protein', 'produce', 'equipment', 'style', 'wildcard', 'flavor'], chaos: MYSTERY_BASKET_CHAOS } },
+  { label: 'Kitchen Chaos', patch: { mode: 'kitchen-chaos', chaos: KITCHEN_CHAOS } },
 ];
 
 export default function SpinScreen() {
@@ -72,12 +70,17 @@ export default function SpinScreen() {
     if (on && config.categories.length <= MIN_WHEELS) return;
     if (!on && config.categories.length >= MAX_WHEELS) return;
     const categories = on ? config.categories.filter((item) => item !== category) : [...CATEGORY_IDS].filter((item) => item === category || config.categories.includes(item));
-    setConfig({ categories });
+    setConfig({ categories, mode: 'free-play' });
     setSlots({});
     setSeed(null);
   };
 
-  const onMode = (mode: Mode) => setConfig({ mode, timeLimitMinutes: MODE_MINUTES[mode] });
+  const onPreset = (patch: Partial<ChallengeConfig>) => {
+    haptic.tick();
+    setConfig(patch);
+    setSlots({});
+    setSeed(null);
+  };
 
   const onCook = async () => {
     if (!seed) return;
@@ -108,21 +111,15 @@ export default function SpinScreen() {
           </View>
 
           <View style={{ gap: SPACE.sm }}>
-            <Label>Mode</Label>
-            <Segmented options={MODES} value={MODES.some((mode) => mode.value === config.mode) ? config.mode : 'standard'} onChange={onMode} />
-          </View>
-
-          <ChaosDial value={config.chaos} onChange={(chaos) => setConfig({ chaos })} width={width - SPACE.lg * 2} />
-
-          <View style={{ gap: SPACE.sm }}>
-            <Row style={{ justifyContent: 'space-between' }}>
-              <Label>Time Limit</Label>
-              <Chip label={config.timeLimitMinutes === null ? 'No Clock' : 'Clock On'} selected={config.timeLimitMinutes !== null} onPress={() => setConfig({ timeLimitMinutes: config.timeLimitMinutes === null ? 45 : null })} />
+            <Label>Presets</Label>
+            <Row wrap>
+              {PRESETS.map((preset) => (
+                <Chip key={preset.label} label={preset.label} selected={config.mode === preset.patch.mode} onPress={() => onPreset(preset.patch)} />
+              ))}
             </Row>
-            {config.timeLimitMinutes !== null ? (
-              <Stepper value={config.timeLimitMinutes} min={TIME_MIN} max={TIME_MAX} step={TIME_STEP} onChange={(timeLimitMinutes) => setConfig({ timeLimitMinutes })} format={(value) => `${value} min`} />
-            ) : null}
           </View>
+
+          <ChaosDial value={config.chaos} onChange={(chaos) => setConfig({ chaos, mode: 'free-play' })} width={width - SPACE.lg * 2} />
         </View>
       ) : null}
 

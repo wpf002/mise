@@ -27,7 +27,6 @@ export function dailyConfig(profile: TasteProfile | null): ChallengeConfig {
     categories: DAILY_CATEGORIES,
     chaos: DAILY_CHAOS,
     difficulty: PROFILE_SKILL[profile.skill],
-    timeLimitMinutes: profile.typicalMinutes,
     excludeAllergens: profile.allergens,
     diets: profile.diets,
     excludeEntryIds: profile.dislikedEntryIds,

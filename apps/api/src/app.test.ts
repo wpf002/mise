@@ -27,7 +27,7 @@ const fail = async () => { throw new ModelUnavailableError(); };
 
 describe('api', () => {
   it('spins, saves, and reads back a challenge', async () => {
-    const app = await buildApp(env, { db: fakeDb(), chef: { createRecipe: fail, detectIngredients: fail, judge: fail } });
+    const app = await buildApp(env, { db: fakeDb(), chef: { createRecipe: fail, detectIngredients: fail } });
     const created = await app.inject({ method: 'POST', url: '/challenges', payload: { config: sampleChallenge().config } });
     expect(created.statusCode).toBe(201);
     const challenge = created.json();
@@ -39,7 +39,7 @@ describe('api', () => {
   });
 
   it('serves a rules recipe when the chef is down and 503s snap', async () => {
-    const app = await buildApp(env, { db: fakeDb(), chef: { createRecipe: fail, detectIngredients: fail, judge: fail } });
+    const app = await buildApp(env, { db: fakeDb(), chef: { createRecipe: fail, detectIngredients: fail } });
     const recipe = await app.inject({ method: 'POST', url: '/recipes', payload: { challenge: sampleChallenge() } });
     expect(recipe.statusCode).toBe(200);
     expect(recipe.json().recipe.source).toBe('rules');
@@ -49,7 +49,7 @@ describe('api', () => {
   });
 
   it('returns the AI recipe when it validates', async () => {
-    const chef: ChefModel = { createRecipe: async () => sampleRecipe(), detectIngredients: fail, judge: fail };
+    const chef: ChefModel = { createRecipe: async () => sampleRecipe(), detectIngredients: fail };
     const app = await buildApp(env, { db: fakeDb(), chef });
     const recipe = await app.inject({ method: 'POST', url: '/recipes', payload: { challenge: sampleChallenge() } });
     expect(recipe.json().recipe.title).toContain('Brown Butter');
@@ -57,7 +57,7 @@ describe('api', () => {
   });
 
   it('rejects bad bodies', async () => {
-    const app = await buildApp(env, { db: fakeDb(), chef: { createRecipe: fail, detectIngredients: fail, judge: fail } });
+    const app = await buildApp(env, { db: fakeDb(), chef: { createRecipe: fail, detectIngredients: fail } });
     const bad = await app.inject({ method: 'POST', url: '/challenges', payload: { config: { categories: ['protein'] } } });
     expect(bad.statusCode).toBe(400);
     await app.close();

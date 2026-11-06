@@ -1,7 +1,7 @@
-import { DetectedIngredient, JudgeResult, Recipe, type Challenge, type TasteProfile } from '@mise/schema';
+import { DetectedIngredient, Recipe, type Challenge, type TasteProfile } from '@mise/schema';
 import { z } from 'zod';
 import { ModelUnavailableError, type ChefModel } from './index';
-import { DETECT_SYSTEM, JUDGE_SYSTEM, RECIPE_SYSTEM, judgeUser, recipeUser } from './prompts';
+import { DETECT_SYSTEM, RECIPE_SYSTEM, recipeUser } from './prompts';
 
 export interface FlintOptions {
   baseUrl: string;
@@ -13,7 +13,6 @@ export interface FlintOptions {
 
 const DEFAULT_MODEL = 'chef';
 const DEFAULT_TIMEOUT_MS = 45_000;
-const JUDGE_LINE_MAX = 20;
 
 const Completion = z.object({
   choices: z.array(z.object({ message: z.object({ content: z.string() }) })).min(1),
@@ -73,25 +72,6 @@ export function createFlintChef(options: FlintOptions): ChefModel {
       return parsed.ingredients.map((item) => DetectedIngredient.parse({ name: item.name, entryId: null, confidence: item.confidence }));
     },
 
-    async judge({ challenge, labels, dishName, description, notes, imageBase64 }) {
-      const text = judgeUser(challenge, labels, dishName, description, notes, Boolean(imageBase64));
-      const content: Content = imageBase64
-        ? [{ type: 'text', text }, { type: 'image_url', image_url: { url: `data:image/jpeg;base64,${imageBase64}` } }]
-        : text;
-      const raw = z.object({
-        lines: z.array(z.object({ category: z.string(), score: z.number(), max: z.number().optional(), evidence: z.string(), note: z.string() })).length(5),
-        strengths: z.array(z.string()),
-        improvements: z.array(z.string()),
-      }).parse(await chat(JUDGE_SYSTEM, content));
-      const lines = raw.lines.map((line) => ({ ...line, max: JUDGE_LINE_MAX, score: Math.min(JUDGE_LINE_MAX, Math.max(0, line.score)) }));
-      return JudgeResult.parse({
-        lines,
-        total: lines.reduce((sum, line) => sum + line.score, 0),
-        strengths: raw.strengths,
-        improvements: raw.improvements,
-        estimate: true,
-      });
-    },
   };
 }
 
@@ -106,13 +86,23 @@ function extractRecipeShape(raw: unknown): Record<string, unknown> {
           return copy;
         })
       : items;
+  const groups = Array.isArray(record.ingredientGroups)
+    ? record.ingredientGroups.map((group) => {
+        const copy = { ...(group as Record<string, unknown>) };
+        copy.items = strip(strip(copy.items, 'entryId'), 'prep');
+        return copy;
+      })
+    : record.ingredientGroups;
   return {
     ...record,
-    ingredients: strip(record.ingredients, 'entryId'),
+    ingredientGroups: groups,
     steps: strip(record.steps, 'equipmentId'),
     safetyNotes: Array.isArray(record.safetyNotes) ? record.safetyNotes : [],
     alternatives: Array.isArray(record.alternatives) ? record.alternatives.slice(0, 3) : [],
-    equipmentNotes: Array.isArray(record.equipmentNotes) ? record.equipmentNotes : [],
+    equipment: Array.isArray(record.equipment) ? record.equipment : [],
+    tips: Array.isArray(record.tips) ? record.tips : [],
+    substitutions: Array.isArray(record.substitutions) ? record.substitutions : [],
+    storage: typeof record.storage === 'string' ? record.storage : '',
   };
 }
 
@@ -121,7 +111,7 @@ export function createUnavailableChef(): ChefModel {
   const fail = async () => {
     throw new ModelUnavailableError();
   };
-  return { createRecipe: fail, detectIngredients: fail, judge: fail };
+  return { createRecipe: fail, detectIngredients: fail };
 }
 
 export type { Challenge, TasteProfile };

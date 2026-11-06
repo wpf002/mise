@@ -68,7 +68,6 @@ model Submission {
   description String
   notes       String?
   photoKey    String?
-  judge       Json?     // validated by @mise/schema JudgeResult
   createdAt   DateTime  @default(now())
 
   @@unique([challengeId, userId])

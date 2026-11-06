@@ -1,4 +1,4 @@
-import { createChallenge, dailyConfig, dailySeed, dayKey, MODE_MINUTES, rulesRecipe } from '@mise/engine';
+import { createChallenge, dailyConfig, dailySeed, dayKey, rulesRecipe } from '@mise/engine';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
@@ -7,7 +7,7 @@ import { api, OfflineError } from '../../src/api/client';
 import { ChallengeStrip } from '../../src/components/recipe/RecipeView';
 import { Body, Button, Card, Label, Row, Screen, SourceBadge, SPACE, Title } from '../../src/components/ui';
 import { haptic } from '../../src/lib/haptics';
-import { deviceTimeZone, formatMinutes, MINUTE_MS } from '../../src/lib/time';
+import { deviceTimeZone, formatMinutes } from '../../src/lib/time';
 import { useStore, type TodayPick } from '../../src/store/useStore';
 import { font, radius } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/useTheme';
@@ -31,7 +31,7 @@ export default function TodayScreen() {
   const today = useStore((s) => s.today);
   const setToday = useStore((s) => s.setToday);
   const setCurrent = useStore((s) => s.setCurrent);
-  const startArena = useStore((s) => s.startArena);
+  const startCook = useStore((s) => s.startCook);
   const [loading, setLoading] = useState(false);
   const [failed, setFailed] = useState(false);
 
@@ -72,8 +72,7 @@ export default function TodayScreen() {
   };
 
   const cook = (pick: TodayPick) => {
-    const minutes = pick.challenge.config.timeLimitMinutes ?? MODE_MINUTES[pick.challenge.config.mode] ?? pick.recipe.totalMinutes;
-    const run = startArena({ mode: pick.challenge.config.mode, challenge: pick.challenge, recipe: pick.recipe, startedAt: Date.now(), durationMs: minutes * MINUTE_MS, strict: false });
+    const run = startCook({ challenge: pick.challenge, recipe: pick.recipe, fallbackReason: pick.fallbackReason });
     router.push(`/cook/${run.id}`);
   };
 

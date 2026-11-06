@@ -36,8 +36,6 @@ export function ChallengeStrip({ challenge, compact }: { challenge: Challenge; c
 
 export function RecipeView({ recipe, challenge, fallbackReason }: { recipe: Recipe; challenge: Challenge; fallbackReason: FallbackReason }) {
   const t = useTheme();
-  const mandatory = recipe.ingredients.filter((item) => item.mandatory);
-  const extras = recipe.ingredients.filter((item) => !item.mandatory);
   return (
     <View style={{ gap: SPACE.lg }}>
       <View style={{ gap: SPACE.sm }}>
@@ -45,9 +43,10 @@ export function RecipeView({ recipe, challenge, fallbackReason }: { recipe: Reci
         <Text style={{ fontFamily: font.display, fontSize: 34, lineHeight: 38, color: t.text }}>{recipe.title}</Text>
         <Text style={{ fontFamily: font.displayItalic, fontSize: 18, lineHeight: 26, color: t.muted }}>{recipe.concept}</Text>
         <Row gap={SPACE.md}>
-          <Stat label="Time" value={formatMinutes(recipe.totalMinutes)} />
+          <Stat label="Prep" value={formatMinutes(recipe.prepMinutes)} />
+          <Stat label="Cook" value={formatMinutes(recipe.cookMinutes)} />
+          <Stat label="Total" value={formatMinutes(recipe.totalMinutes)} />
           <Stat label="Serves" value={String(recipe.servings)} />
-          <Stat label="Steps" value={String(recipe.steps.length)} />
         </Row>
       </View>
 
@@ -60,31 +59,52 @@ export function RecipeView({ recipe, challenge, fallbackReason }: { recipe: Reci
         </Card>
       ) : null}
 
-      <View style={{ gap: SPACE.sm }}>
+      <View style={{ gap: SPACE.md }}>
         <Heading>Ingredients</Heading>
-        {mandatory.map((item) => <IngredientLine key={item.name} name={item.name} quantity={item.quantity} hero />)}
-        {extras.map((item) => <IngredientLine key={item.name} name={item.name} quantity={item.quantity} />)}
+        {recipe.ingredientGroups.map((group) => (
+          <View key={group.title} style={{ gap: SPACE.xs }}>
+            <Label color={t.accent}>{group.title}</Label>
+            {group.items.map((item, index) => <IngredientLine key={`${item.name}-${index}`} name={item.name} prep={item.prep} quantity={item.quantity} hero={item.mandatory} />)}
+          </View>
+        ))}
       </View>
 
-      <View style={{ gap: SPACE.sm }}>
+      <View style={{ gap: SPACE.md }}>
         <Heading>Steps</Heading>
         {recipe.steps.map((step, index) => (
-          <Row key={`${step.atMinute}-${index}`} gap={SPACE.md} style={{ alignItems: 'flex-start' }}>
+          <Row key={`${step.title}-${index}`} gap={SPACE.md} style={{ alignItems: 'flex-start' }}>
             <View style={{ width: 52, alignItems: 'center', gap: 2 }}>
               <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: t.primary, alignItems: 'center', justifyContent: 'center' }}>
                 <Text style={{ fontFamily: font.display, fontSize: 16, color: '#FFFBF4' }}>{index + 1}</Text>
               </View>
-              <Text style={{ fontFamily: font.bodyBold, fontSize: 11, color: t.muted }}>{step.atMinute}′</Text>
+              <Text style={{ fontFamily: font.bodyBold, fontSize: 11, color: t.muted }}>{step.durationMinutes} min</Text>
             </View>
-            <Body style={{ flex: 1 }}>{step.text}</Body>
+            <View style={{ flex: 1, gap: 2 }}>
+              <Body bold>{step.title}</Body>
+              <Body>{step.text}</Body>
+            </View>
           </Row>
         ))}
       </View>
 
-      {recipe.equipmentNotes.length ? (
+      {recipe.equipment.length ? (
         <View style={{ gap: SPACE.xs }}>
-          <Label>Gear</Label>
-          {recipe.equipmentNotes.map((note) => <Body key={note} muted>{note}</Body>)}
+          <Heading>Gear</Heading>
+          {recipe.equipment.map((item) => <Bullet key={item} text={item} />)}
+        </View>
+      ) : null}
+
+      {recipe.tips.length ? (
+        <Card>
+          <Label>Tips</Label>
+          {recipe.tips.map((tip) => <Bullet key={tip} text={tip} />)}
+        </Card>
+      ) : null}
+
+      {recipe.substitutions.length ? (
+        <View style={{ gap: SPACE.xs }}>
+          <Heading>Substitutions</Heading>
+          {recipe.substitutions.map((sub) => <Bullet key={sub} text={sub} />)}
         </View>
       ) : null}
 
@@ -93,6 +113,8 @@ export function RecipeView({ recipe, challenge, fallbackReason }: { recipe: Reci
         <Body>{recipe.flavorNotes}</Body>
         <Label style={{ marginTop: SPACE.sm }}>Plating</Label>
         <Body>{recipe.plating}</Body>
+        <Label style={{ marginTop: SPACE.sm }}>Storage</Label>
+        <Body>{recipe.storage}</Body>
       </Card>
 
       {recipe.alternatives.length ? (
@@ -110,6 +132,16 @@ export function RecipeView({ recipe, challenge, fallbackReason }: { recipe: Reci
   );
 }
 
+function Bullet({ text }: { text: string }) {
+  const t = useTheme();
+  return (
+    <Row gap={SPACE.sm} style={{ alignItems: 'flex-start' }}>
+      <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: t.accent, marginTop: 9 }} />
+      <Body style={{ flex: 1 }}>{text}</Body>
+    </Row>
+  );
+}
+
 function Stat({ label, value }: { label: string; value: string }) {
   const t = useTheme();
   return (
@@ -120,15 +152,21 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
-function IngredientLine({ name, quantity, hero }: { name: string; quantity: string; hero?: boolean }) {
+/** Keeps a long quantity from squeezing the name column. */
+const QUANTITY_MAX_WIDTH = 140;
+
+function IngredientLine({ name, prep, quantity, hero }: { name: string; prep?: string; quantity: string; hero?: boolean }) {
   const t = useTheme();
   return (
-    <Row style={{ justifyContent: 'space-between', paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: t.surface }}>
-      <Row gap={SPACE.sm} style={{ flex: 1 }}>
-        <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: hero ? t.primary : t.raised }} />
-        <Body bold={hero} style={{ flex: 1 }}>{name}</Body>
+    <Row style={{ justifyContent: 'space-between', alignItems: 'flex-start', paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: t.surface }}>
+      <Row gap={SPACE.sm} style={{ flex: 1, alignItems: 'flex-start' }}>
+        <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: hero ? t.primary : t.raised, marginTop: 8 }} />
+        <View style={{ flex: 1 }}>
+          <Body bold={hero}>{name}</Body>
+          {prep ? <Body muted>{prep}</Body> : null}
+        </View>
       </Row>
-      <Body muted>{quantity}</Body>
+      <Body muted style={{ marginLeft: SPACE.sm, maxWidth: QUANTITY_MAX_WIDTH, textAlign: 'right' }}>{quantity}</Body>
     </Row>
   );
 }

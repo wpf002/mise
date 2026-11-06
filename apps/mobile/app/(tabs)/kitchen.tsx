@@ -72,10 +72,7 @@ export default function KitchenScreen() {
               <Label>{savedDate(item.savedAt)}</Label>
             </Row>
             <Text style={{ fontFamily: font.display, fontSize: 22, lineHeight: 26, color: t.text }}>{item.recipe.title}</Text>
-            <Row style={{ justifyContent: 'space-between' }}>
-              <ChallengeStrip challenge={item.challenge} compact />
-              {item.judge ? <Text style={{ fontFamily: font.display, fontSize: 20, color: t.accent }}>{Math.round(item.judge.total)} pts</Text> : null}
-            </Row>
+            <ChallengeStrip challenge={item.challenge} compact />
           </Pressable>
         ))}
       </View>

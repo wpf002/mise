@@ -1,25 +1,14 @@
-import { Challenge as ChallengeSchema, type Challenge, type ChallengeConfig, type Mode } from '@mise/schema';
+import { Challenge as ChallengeSchema, type Challenge, type ChallengeConfig } from '@mise/schema';
 import { LIBRARY_VERSION } from './library';
 import { hash } from './rng';
 import { spin, type Slots } from './spin';
 
 export const CHALLENGE_LINK_SCHEME = 'mise://c/';
 
-export const MODE_MINUTES: Record<Mode, number | null> = {
-  'free-play': null,
-  quickfire: 20,
-  standard: 45,
-  master: 90,
-  'mystery-basket': 45,
-  'head-to-head': 45,
-  'kitchen-chaos': 30,
-};
-
 export const DEFAULT_CONFIG: ChallengeConfig = {
   categories: ['protein', 'produce', 'equipment', 'style'],
   difficulty: 'standard',
   chaos: 0.35,
-  timeLimitMinutes: null,
   mode: 'free-play',
   excludeAllergens: [],
   diets: [],

@@ -32,12 +32,11 @@ Monorepo, Expo shell with five tabs, Fastify API with health route, Prisma schem
 - Daily pick seeded by `userId + date`, generated once and cached in `DailyPick`. Push notification at the user's chosen time.
 - "Not Feeling It" swaps once per day.
 
-## Phase 5: Arena, Solo
+## Phase 5: Cook Mode
 
-- Quickfire, Standard, Master Chef, Mystery Basket, Kitchen Chaos. Timestamp timer, keep-awake, announcements with visual equivalents, casual pause vs strict mode.
-- Cook Mode: 72pt targets, timer plus current step only.
-- Submit dish name, notes, photo. AI judging with evidence labels and a total shown as "AI Estimate".
-- Rematch and Reinvent.
+- Presets on Spin: Mystery Basket, Kitchen Chaos. No timers, no judging.
+- Cook Mode: 72pt targets, keep-awake, one titled step at a time with its minutes, ingredient list one tap away.
+- Done saves the cook to Kitchen. Cook Again from any saved recipe.
 
 ## Phase 6: Accounts and Sync
 
@@ -61,4 +60,3 @@ Live remote competitions, AI commentary, voice-guided cooking, tournaments, comm
 - 60%+ of started challenges get finished.
 - 35%+ of users start a second recipe within a week.
 - Validator passes 85%+ first try, 97%+ after one retry, zero unsafe recipes reach users.
-- Timer is never wrong on a locked phone.

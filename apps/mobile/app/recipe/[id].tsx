@@ -2,9 +2,8 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect } from 'react';
 import { Alert, Pressable, Text, TextInput, View } from 'react-native';
 import { RecipeView } from '../../src/components/recipe/RecipeView';
-import { Body, Button, Card, Label, Row, Screen, SPACE } from '../../src/components/ui';
+import { Button, Card, Label, Row, Screen, SPACE } from '../../src/components/ui';
 import { haptic } from '../../src/lib/haptics';
-import { MINUTE_MS } from '../../src/lib/time';
 import { useStore } from '../../src/store/useStore';
 import { font, radius, touch } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/useTheme';
@@ -18,7 +17,7 @@ export default function SavedRecipeScreen() {
   const saved = useStore((s) => s.history.find((item) => item.id === id));
   const updateSaved = useStore((s) => s.updateSaved);
   const removeSaved = useStore((s) => s.removeSaved);
-  const startArena = useStore((s) => s.startArena);
+  const startCook = useStore((s) => s.startCook);
 
   useEffect(() => {
     if (!saved) router.replace('/(tabs)/kitchen');
@@ -27,8 +26,7 @@ export default function SavedRecipeScreen() {
   if (!saved) return null;
 
   const cookAgain = () => {
-    const minutes = saved.challenge.config.timeLimitMinutes ?? saved.recipe.totalMinutes;
-    const run = startArena({ mode: saved.challenge.config.mode, challenge: saved.challenge, recipe: saved.recipe, startedAt: Date.now(), durationMs: minutes * MINUTE_MS, strict: false });
+    const run = startCook({ challenge: saved.challenge, recipe: saved.recipe, fallbackReason: saved.fallbackReason });
     router.push(`/cook/${run.id}`);
   };
 
@@ -63,14 +61,6 @@ export default function SavedRecipeScreen() {
           style={{ fontFamily: font.body, fontSize: 17, color: t.text, backgroundColor: t.raised, borderRadius: radius.md, padding: SPACE.md, minHeight: 80, textAlignVertical: 'top' }}
         />
       </Card>
-
-      {saved.judge ? (
-        <Card tint={t.accent}>
-          <Label color={t.accent}>AI Estimate</Label>
-          <Text style={{ fontFamily: font.display, fontSize: 32, color: t.text }}>{Math.round(saved.judge.total)} Points</Text>
-          {saved.judge.strengths.slice(0, 2).map((line) => <Body key={line}>{line}</Body>)}
-        </Card>
-      ) : null}
 
       <RecipeView recipe={saved.recipe} challenge={saved.challenge} fallbackReason={saved.fallbackReason} />
 

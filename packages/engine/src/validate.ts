@@ -1,10 +1,10 @@
-import type { Allergen, Challenge, Recipe } from '@mise/schema';
+import { recipeIngredients, type Allergen, type Challenge, type Recipe } from '@mise/schema';
 import { entryById, type Entry } from './library';
 import { SAFETY, type SafetyClass } from './safety';
 import { draftFromSlots } from './spin';
 
 export interface ValidationIssue {
-  code: 'allergen' | 'time' | 'safety-note' | 'missing-hero' | 'step-overlap';
+  code: 'allergen' | 'safety-note' | 'missing-hero';
   message: string;
 }
 
@@ -41,20 +41,11 @@ export function validateRecipe(recipe: Recipe, challenge: Challenge): Validation
   const issues: ValidationIssue[] = [];
   const banned = new Set(challenge.config.excludeAllergens);
 
-  for (const ingredient of recipe.ingredients) {
+  const ingredients = recipeIngredients(recipe);
+  for (const ingredient of ingredients) {
     const entry = ingredient.entryId ? entryById(ingredient.entryId) : undefined;
     const hit = ingredientAllergens(ingredient.name, entry).find((allergen) => banned.has(allergen));
     if (hit) issues.push({ code: 'allergen', message: `"${ingredient.name}" contains ${hit}, which is excluded.` });
-  }
-
-  const limit = challenge.config.timeLimitMinutes;
-  if (limit !== null && recipe.totalMinutes > limit) {
-    issues.push({ code: 'time', message: `Recipe takes ${recipe.totalMinutes} min but the limit is ${limit} min.` });
-  }
-
-  const lastStep = recipe.steps.reduce((end, step) => Math.max(end, step.atMinute + step.durationMinutes), 0);
-  if (lastStep > recipe.totalMinutes) {
-    issues.push({ code: 'step-overlap', message: `Steps run to minute ${lastStep} but totalMinutes is ${recipe.totalMinutes}.` });
   }
 
   for (const note of requiredSafetyNotes(challenge)) {
@@ -65,7 +56,7 @@ export function validateRecipe(recipe: Recipe, challenge: Challenge): Validation
 
   const heroes = Object.values(draftFromSlots(challenge.slots)).filter((entry) => entry.centrality === 'hero');
   for (const hero of heroes) {
-    const used = recipe.ingredients.some((ingredient) => ingredient.entryId === hero.id || ingredient.name.toLowerCase().includes(hero.label.toLowerCase().split(' ')[0] ?? ''));
+    const used = ingredients.some((ingredient) => ingredient.entryId === hero.id || ingredient.name.toLowerCase().includes(hero.label.toLowerCase().split(' ')[0] ?? ''));
     if (!used) issues.push({ code: 'missing-hero', message: `${hero.label} is the hero of this spin but is not in the recipe.` });
   }
   return issues;
