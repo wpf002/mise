@@ -1,0 +1,50 @@
+{
+  "expo": {
+    "name": "Mise",
+    "slug": "mise",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.fotiventures.mise"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "package": "com.fotiventures.mise"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-secure-store",
+      "expo-sqlite",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Mise uses the camera to see what is in your fridge."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Mise uses your photos to read your fridge and save your dishes."
+        }
+      ],
+      ["expo-notifications", {}]
+    ],
+    "scheme": "mise",
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

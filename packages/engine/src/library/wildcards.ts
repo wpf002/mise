@@ -1,0 +1,47 @@
+import { DAIRY, EGG, FISH, PLANT, WHEAT_VEG, defineCategory } from './types';
+
+const wildcard = defineCategory('wildcard', {
+  roles: [], allergens: [], diets: PLANT, safetyClass: 'none', skill: 1, centrality: 'garnish',
+});
+
+/** Wildcards are the twist. Most are pantry items; a few are chaos. */
+export const WILDCARDS = wildcard([
+  { id: 'hot-honey', label: 'Hot Honey', emoji: '🍯', roles: ['sweet', 'heat'], diets: ['vegetarian', 'pescatarian', 'gluten-free', 'dairy-free', 'halal', 'kosher'] },
+  { id: 'peanut-butter', label: 'Peanut Butter', emoji: '🥜', roles: ['fat', 'binder'], allergens: ['peanut'], centrality: 'supporting' },
+  { id: 'miso', label: 'White Miso', emoji: '🍵', roles: ['umami'], allergens: ['soy'] },
+  { id: 'kimchi', label: 'Kimchi', emoji: '🥬', roles: ['acid', 'heat', 'umami', 'crunch'], diets: ['vegetarian', 'pescatarian', 'gluten-free', 'dairy-free', 'halal'] , centrality: 'supporting' },
+  { id: 'dill-pickles', label: 'Dill Pickles', emoji: '🥒', roles: ['acid', 'crunch'] },
+  { id: 'potato-chips', label: 'Potato Chips', emoji: '🥔', roles: ['crunch', 'fat'] },
+  { id: 'instant-ramen', label: 'Instant Ramen', emoji: '🍜', roles: ['starch'], allergens: ['wheat'], diets: WHEAT_VEG, centrality: 'supporting' },
+  { id: 'everything-seasoning', label: 'Everything Bagel Seasoning', emoji: '🥯', roles: ['crunch', 'aromatic'], allergens: ['sesame'] },
+  { id: 'maple-syrup', label: 'Maple Syrup', emoji: '🍁', roles: ['sweet'] },
+  { id: 'cold-brew', label: 'Cold Brew Coffee', emoji: '☕', roles: ['umami'], skill: 2 },
+  { id: 'dark-chocolate', label: 'Dark Chocolate', emoji: '🍫', roles: ['sweet', 'fat'], skill: 2 },
+  { id: 'cornflakes', label: 'Cornflakes', emoji: '🥣', roles: ['crunch', 'starch'] },
+  { id: 'popcorn', label: 'Popcorn', emoji: '🍿', roles: ['crunch', 'starch'] },
+  { id: 'pretzels', label: 'Pretzels', emoji: '🥨', roles: ['crunch', 'starch'], allergens: ['wheat'], diets: WHEAT_VEG },
+  { id: 'ranch', label: 'Ranch Dressing', emoji: '🥛', roles: ['fat', 'acid'], allergens: ['milk', 'egg'], diets: ['vegetarian', 'pescatarian', 'gluten-free', 'halal', 'kosher'] },
+  { id: 'blue-cheese', label: 'Blue Cheese', emoji: '🧀', roles: ['fat', 'umami'], allergens: ['milk'], diets: DAIRY },
+  { id: 'gochujang', label: 'Gochujang', emoji: '🌶️', roles: ['heat', 'sweet', 'umami'], allergens: ['soy', 'wheat'], diets: ['vegetarian', 'vegan', 'pescatarian', 'dairy-free', 'halal', 'kosher'] },
+  { id: 'tahini', label: 'Tahini', emoji: '🫙', roles: ['fat', 'binder'], allergens: ['sesame'] },
+  { id: 'coconut-milk', label: 'Coconut Milk', emoji: '🥥', roles: ['fat', 'sweet'], centrality: 'supporting' },
+  { id: 'fish-sauce', label: 'Fish Sauce', emoji: '🐟', roles: ['umami'], allergens: ['fish'], diets: FISH },
+  { id: 'capers', label: 'Capers', emoji: '🫒', roles: ['acid', 'umami'] },
+  { id: 'anchovies', label: 'Anchovies', emoji: '🐟', roles: ['umami', 'fat'], allergens: ['fish'], diets: FISH, skill: 2 },
+  { id: 'orange-marmalade', label: 'Orange Marmalade', emoji: '🍊', roles: ['sweet', 'acid'] },
+  { id: 'bourbon', label: 'Bourbon', emoji: '🥃', roles: ['sweet', 'aromatic'], diets: ['vegetarian', 'vegan', 'pescatarian', 'gluten-free', 'dairy-free', 'kosher'], skill: 2 },
+  { id: 'lager', label: 'Lager', emoji: '🍺', roles: ['acid'], allergens: ['wheat'], diets: ['vegetarian', 'vegan', 'pescatarian', 'dairy-free', 'kosher'] },
+  { id: 'ginger-ale', label: 'Ginger Ale', emoji: '🥤', roles: ['sweet', 'aromatic'] },
+  { id: 'strawberry-jam', label: 'Strawberry Jam', emoji: '🍓', roles: ['sweet'] },
+  { id: 'tortilla-chips', label: 'Tortilla Chips', emoji: '🔺', roles: ['crunch', 'starch'] },
+  { id: 'cream-cheese', label: 'Cream Cheese', emoji: '🧀', roles: ['fat', 'binder'], allergens: ['milk'], diets: DAIRY },
+  { id: 'sriracha', label: 'Sriracha', emoji: '🌶️', roles: ['heat', 'acid'] },
+  { id: 'crispy-shallots', label: 'Crispy Shallots', emoji: '🧅', roles: ['crunch', 'aromatic'] },
+  { id: 'sesame-oil', label: 'Toasted Sesame Oil', emoji: '🫙', roles: ['fat', 'aromatic'], allergens: ['sesame'] },
+  { id: 'pickled-jalapenos', label: 'Pickled Jalapeños', emoji: '🌶️', roles: ['acid', 'heat'] },
+  { id: 'mayo', label: 'Mayonnaise', emoji: '🥚', roles: ['fat', 'binder'], allergens: ['egg'], diets: EGG },
+  { id: 'brown-butter', label: 'Brown Butter', emoji: '🧈', roles: ['fat', 'aromatic'], allergens: ['milk'], diets: DAIRY },
+  { id: 'preserved-lemon', label: 'Preserved Lemon', emoji: '🍋', roles: ['acid', 'umami'], skill: 2 },
+  { id: 'harissa', label: 'Harissa', emoji: '🔥', roles: ['heat', 'aromatic'] },
+  { id: 'honey-mustard', label: 'Honey Mustard', emoji: '🍯', roles: ['sweet', 'acid'], diets: ['vegetarian', 'pescatarian', 'gluten-free', 'dairy-free', 'halal', 'kosher'] },
+]);

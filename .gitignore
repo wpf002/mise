@@ -1,0 +1,25 @@
+node_modules/
+dist/
+.turbo/
+coverage/
+*.log
+.DS_Store
+
+# env: only .env.example is committed
+.env
+.env.*
+!.env.example
+
+# expo
+.expo/
+ios/
+android/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+web-build/
+
+# prisma generated client
+apps/api/src/generated/

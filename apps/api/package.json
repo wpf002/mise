@@ -1,0 +1,42 @@
+{
+  "name": "@mise/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch --env-file-if-exists=.env src/server.ts",
+    "build": "tsup",
+    "start": "node dist/server.js",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy"
+  },
+  "dependencies": {
+    "@fastify/cors": "^11.4.1",
+    "@fastify/helmet": "^13.2.0",
+    "@fastify/jwt": "^10.2.7",
+    "@fastify/multipart": "^10.1.8",
+    "@fastify/rate-limit": "^11.2.2",
+    "@fastify/sensible": "^6.0.7",
+    "@mise/ai": "workspace:*",
+    "@mise/engine": "workspace:*",
+    "@mise/schema": "workspace:*",
+    "@prisma/adapter-pg": "^7.10.1",
+    "@prisma/client": "^7.10.1",
+    "dotenv": "^18.0.9",
+    "fastify": "^5.12.8",
+    "zod": "^4.6.7",
+    "fastify-plugin": "^5.1.0"
+  },
+  "devDependencies": {
+    "@mise/tsconfig": "workspace:*",
+    "@types/node": "^26.6.6",
+    "pino-pretty": "^13.2.0",
+    "prisma": "^7.10.1",
+    "tsup": "^9.0.0",
+    "tsx": "^4.23.15",
+    "vitest": "^5.1.0"
+  }
+}

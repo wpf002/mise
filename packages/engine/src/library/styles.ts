@@ -1,0 +1,40 @@
+import { NONE, defineCategory } from './types';
+
+const style = defineCategory('style', {
+  roles: [], allergens: [], diets: NONE, safetyClass: 'none', skill: 1, centrality: 'supporting',
+});
+
+export const STYLES = style([
+  { id: 'smashed', label: 'Smashed', emoji: '🔨', roles: ['crunch'], needs: ['sear'] },
+  { id: 'braised', label: 'Braised', emoji: '🍯', needs: ['braise', 'slow', 'pressure'], skill: 2 },
+  { id: 'seared', label: 'Seared', emoji: '🔥', needs: ['sear'] },
+  { id: 'roasted', label: 'Roasted', emoji: '🌰', needs: ['roast'] },
+  { id: 'grilled', label: 'Grilled', emoji: '🔥', needs: ['grill'] },
+  { id: 'shallow-fried', label: 'Shallow Fried', emoji: '🍳', roles: ['crunch', 'fat'], needs: ['fry'] },
+  { id: 'deep-fried', label: 'Deep Fried', emoji: '🍟', roles: ['crunch', 'fat'], needs: ['fry'], skill: 2 },
+  { id: 'air-fried', label: 'Air Fried', emoji: '🌀', roles: ['crunch'], needs: ['air-fry'] },
+  { id: 'stir-fried', label: 'Stir Fried', emoji: '🥘', needs: ['fry', 'sear'] },
+  { id: 'steamed', label: 'Steamed', emoji: '♨️', needs: ['steam'] },
+  { id: 'poached', label: 'Poached', emoji: '💧', needs: ['simmer'], skill: 2 },
+  { id: 'baked', label: 'Baked', emoji: '🥧', needs: ['bake'] },
+  { id: 'broiled', label: 'Broiled', emoji: '☀️', needs: ['broil'] },
+  { id: 'crudo', label: 'Raw / Crudo', emoji: '🧊', roles: ['fresh'], needs: ['chop'], skill: 3 },
+  { id: 'quick-pickled', label: 'Quick Pickled', emoji: '🥒', roles: ['acid', 'crunch'], needs: ['boil', 'chop'] },
+  { id: 'charred', label: 'Charred', emoji: '🖤', needs: ['grill', 'broil', 'sear'] },
+  { id: 'slow-cooked', label: 'Slow Cooked', emoji: '🐌', needs: ['slow', 'braise'], skill: 2 },
+  { id: 'pressure-cooked', label: 'Pressure Cooked', emoji: '⏲️', needs: ['pressure'], skill: 2 },
+  { id: 'blended', label: 'Blended', emoji: '🌪️', needs: ['blend'] },
+  { id: 'stuffed', label: 'Stuffed', emoji: '🎁', needs: ['bake', 'roast'], skill: 2 },
+  { id: 'skewered', label: 'Skewered', emoji: '🍢', needs: ['grill', 'broil', 'sear'] },
+  { id: 'breaded', label: 'Breaded and Crispy', emoji: '🍞', roles: ['crunch'], needs: ['fry', 'air-fry', 'bake'], skill: 2 },
+  { id: 'glazed', label: 'Glazed', emoji: '✨', roles: ['sweet'], needs: ['sear', 'roast', 'broil'] },
+  { id: 'smoked', label: 'Smoked', emoji: '💨', needs: ['smoke'], skill: 3 },
+  { id: 'confit', label: 'Confit', emoji: '🫙', roles: ['fat'], needs: ['bake', 'slow'], skill: 3 },
+  { id: 'blackened', label: 'Blackened', emoji: '⚫', roles: ['heat'], needs: ['sear'], skill: 2 },
+  { id: 'shaved', label: 'Shaved Thin', emoji: '📏', roles: ['fresh', 'crunch'], needs: ['chop'] },
+  { id: 'caramelized', label: 'Caramelized', emoji: '🍮', roles: ['sweet'], needs: ['sear', 'simmer'], skill: 2 },
+  { id: 'whipped', label: 'Whipped', emoji: '☁️', needs: ['whip', 'blend'] },
+  { id: 'toasted', label: 'Toasted', emoji: '🍞', roles: ['crunch'], needs: ['toast', 'bake'] },
+  { id: 'pressed', label: 'Pressed', emoji: '🥪', roles: ['crunch'], needs: ['press', 'sear'] },
+  { id: 'one-pot', label: 'One Pot', emoji: '🍲', needs: ['simmer', 'braise', 'pressure'] },
+]);

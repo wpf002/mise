@@ -1,0 +1,86 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String        @id @default(cuid())
+  email        String        @unique
+  displayName  String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  profile      TasteProfile?
+  challenges   Challenge[]
+  recipes      Recipe[]
+  submissions  Submission[]
+  dailyPicks   DailyPick[]
+}
+
+model TasteProfile {
+  userId    String   @id
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  data      Json     // validated by @mise/schema TasteProfile
+  updatedAt DateTime @updatedAt
+}
+
+model Challenge {
+  id             String       @id @default(cuid())
+  seed           String
+  libraryVersion String
+  config         Json
+  slots          Json
+  ownerId        String?
+  owner          User?        @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  createdAt      DateTime     @default(now())
+  recipe         Recipe?
+  submissions    Submission[]
+
+  @@index([ownerId, createdAt])
+}
+
+model Recipe {
+  id          String     @id @default(cuid())
+  ownerId     String
+  owner       User       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  challengeId String?    @unique
+  challenge   Challenge? @relation(fields: [challengeId], references: [id], onDelete: SetNull)
+  title       String
+  data        Json       // validated by @mise/schema Recipe
+  source      String     // ai | rules | demo
+  rating      Int?
+  notes       String?
+  createdAt   DateTime   @default(now())
+
+  @@index([ownerId, createdAt])
+}
+
+model Submission {
+  id          String    @id @default(cuid())
+  challengeId String
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dishName    String
+  description String
+  notes       String?
+  photoKey    String?
+  judge       Json?     // validated by @mise/schema JudgeResult
+  createdAt   DateTime  @default(now())
+
+  @@unique([challengeId, userId])
+}
+
+model DailyPick {
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  day       String   // YYYY-MM-DD in the user's time zone
+  seed      String
+  recipe    Json
+  createdAt DateTime @default(now())
+
+  @@id([userId, day])
+}
