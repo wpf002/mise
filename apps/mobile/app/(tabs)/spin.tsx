@@ -1,10 +1,9 @@
 import { CATEGORY_IDS, type CategoryId, type ChallengeConfig } from '@mise/schema';
-import { CATEGORY_LABEL, createChallenge, EmptyWheelError, reroll, toggleLock, type Slots } from '@mise/engine';
+import { CATEGORY_LABEL, createChallenge, EmptyWheelError, LEVELS, reroll, toggleLock, type Slots } from '@mise/engine';
 import { useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
-import { Alert, useWindowDimensions, View } from 'react-native';
+import { Alert, View } from 'react-native';
 import { PrepBowl, SPIN_TOTAL_MS } from '../../src/components/spin/PrepBowl';
-import { ChaosDial } from '../../src/components/ui/ChaosDial';
 import { Body, Button, Chip, Label, Row, Screen, SPACE, Title } from '../../src/components/ui';
 import { useRecipe } from '../../src/hooks/useRecipe';
 import { haptic } from '../../src/lib/haptics';
@@ -15,19 +14,16 @@ import { useTheme } from '../../src/theme/useTheme';
 
 const MIN_WHEELS = 2;
 const MAX_WHEELS = 8;
-const MYSTERY_BASKET_CHAOS = 0.6;
-const KITCHEN_CHAOS = 1;
 
-/** One-tap setups. Each sets the mode so the chip reads as selected until the config changes again. */
+/** One-tap wheel setups. Each sets the mode so the chip reads as selected until the wheels change again. */
 const PRESETS: Array<{ label: string; patch: Partial<ChallengeConfig> }> = [
-  { label: 'Mystery Basket', patch: { mode: 'mystery-basket', categories: ['protein', 'produce', 'equipment', 'style', 'wildcard', 'flavor'], chaos: MYSTERY_BASKET_CHAOS } },
-  { label: 'Kitchen Chaos', patch: { mode: 'kitchen-chaos', chaos: KITCHEN_CHAOS } },
+  { label: 'Mystery Basket', patch: { mode: 'mystery-basket', categories: ['protein', 'produce', 'equipment', 'style', 'wildcard', 'flavor'] } },
+  { label: 'Kitchen Chaos', patch: { mode: 'kitchen-chaos', categories: [...CATEGORY_IDS] } },
 ];
 
 export default function SpinScreen() {
   const t = useTheme();
   const router = useRouter();
-  const { width } = useWindowDimensions();
   const config = useStore((s) => s.config);
   const setConfig = useStore((s) => s.setConfig);
   const [seed, setSeed] = useState<string | null>(null);
@@ -71,6 +67,14 @@ export default function SpinScreen() {
     if (!on && config.categories.length >= MAX_WHEELS) return;
     const categories = on ? config.categories.filter((item) => item !== category) : [...CATEGORY_IDS].filter((item) => item === category || config.categories.includes(item));
     setConfig({ categories, mode: 'free-play' });
+    setSlots({});
+    setSeed(null);
+  };
+
+  const onLevel = (level: (typeof LEVELS)[number]) => {
+    if (level.difficulty === config.difficulty) return;
+    haptic.tick();
+    setConfig({ difficulty: level.difficulty, chaos: level.chaos });
     setSlots({});
     setSeed(null);
   };
@@ -119,7 +123,14 @@ export default function SpinScreen() {
             </Row>
           </View>
 
-          <ChaosDial value={config.chaos} onChange={(chaos) => setConfig({ chaos, mode: 'free-play' })} width={width - SPACE.lg * 2} />
+          <View style={{ gap: SPACE.sm }}>
+            <Label>Level</Label>
+            <Row wrap>
+              {LEVELS.map((level) => (
+                <Chip key={level.label} label={level.label} selected={config.difficulty === level.difficulty} onPress={() => onLevel(level)} />
+              ))}
+            </Row>
+          </View>
         </View>
       ) : null}
 

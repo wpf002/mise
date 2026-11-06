@@ -5,10 +5,19 @@ import { spin, type Slots } from './spin';
 
 export const CHALLENGE_LINK_SCHEME = 'mise://c/';
 
+/** The three levels a cook picks on Spin. Each pins a skill ceiling and how weird the draw may get. */
+export const LEVELS: ReadonlyArray<{ label: string; difficulty: ChallengeConfig['difficulty']; chaos: number }> = [
+  { label: 'Easy', difficulty: 'easy', chaos: 0.2 },
+  { label: 'Medium', difficulty: 'standard', chaos: 0.45 },
+  { label: 'Hard', difficulty: 'master', chaos: 0.8 },
+];
+
+const DEFAULT_LEVEL = LEVELS[1]!;
+
 export const DEFAULT_CONFIG: ChallengeConfig = {
   categories: ['protein', 'produce', 'equipment', 'style'],
-  difficulty: 'standard',
-  chaos: 0.35,
+  difficulty: DEFAULT_LEVEL.difficulty,
+  chaos: DEFAULT_LEVEL.chaos,
   mode: 'free-play',
   excludeAllergens: [],
   diets: [],

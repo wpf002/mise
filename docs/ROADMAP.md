@@ -9,7 +9,7 @@ Monorepo, Expo shell with five tabs, Fastify API with health route, Prisma schem
 ## Phase 1: Engine and Library
 
 - 40 to 60 hand-tagged entries per category (~400 total): roles, allergens, diets, safety class, equipment capabilities, skill, centrality.
-- `spin(config, seed)` with lock, reroll, exclusions, pantry priority, and a playability score gated by the Chaos slider. Resample up to 20 times, then relax.
+- `spin(config, seed)` with lock, reroll, exclusions, pantry priority, and a playability score gated by the Easy / Medium / Hard level. Resample up to 20 times, then relax.
 - Equipment capability checks (a pop-up toaster can only toast, so it never carries a dish alone).
 - Property tests: allergens never appear across thousands of seeds; locked wheels never change.
 

@@ -1,4 +1,4 @@
-import { DEFAULT_CONFIG, rulesRecipe } from '@mise/engine';
+import { DEFAULT_CONFIG, LEVELS, rulesRecipe } from '@mise/engine';
 import type { Challenge, ChallengeConfig, Recipe, TasteProfile } from '@mise/schema';
 import Storage from 'expo-sqlite/kv-store';
 import { create } from 'zustand';
@@ -92,6 +92,7 @@ export const useStore = create<State>()(
             excludeEntryIds: profile.dislikedEntryIds,
             availableEquipmentIds: profile.equipmentIds.length ? profile.equipmentIds : null,
             difficulty: profile.preferredDifficulty,
+            chaos: LEVELS.find((level) => level.difficulty === profile.preferredDifficulty)?.chaos ?? DEFAULT_CONFIG.chaos,
           },
         }),
       setConfig: (patch) => set({ config: { ...get().config, ...patch } }),

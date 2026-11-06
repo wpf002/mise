@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { type ChallengeConfig, recipeIngredients } from '@mise/schema';
-import { DEFAULT_CONFIG, challengeLink, createChallenge, parseChallengeLink } from './challenge';
+import { DEFAULT_CONFIG, LEVELS, challengeLink, createChallenge, parseChallengeLink } from './challenge';
 import { dailySeed, dayKey } from './daily';
 import { entryById, LIBRARY } from './library';
 import { rulesRecipe } from './rules';
@@ -184,5 +184,16 @@ describe('daily', () => {
     const copy = [...recipe.steps.map((item) => item.text), ...recipe.tips, ...recipe.substitutions, recipe.plating, recipe.flavorNotes].join(' ');
     expect(copy).not.toMatch(/\bhero\b/i);
     expect(recipe.steps.at(-1)?.text).not.toContain('Slice');
+  });
+});
+
+describe('levels', () => {
+  it('spins every level and the default config matches one of them', () => {
+    expect(LEVELS.map((level) => level.label)).toEqual(['Easy', 'Medium', 'Hard']);
+    expect(LEVELS.some((level) => level.difficulty === DEFAULT_CONFIG.difficulty && level.chaos === DEFAULT_CONFIG.chaos)).toBe(true);
+    for (const level of LEVELS) {
+      const slots = spin({ ...DEFAULT_CONFIG, difficulty: level.difficulty, chaos: level.chaos }, `level-${level.label}`);
+      expect(Object.keys(slots)).toHaveLength(DEFAULT_CONFIG.categories.length);
+    }
   });
 });
